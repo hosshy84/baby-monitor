@@ -42,7 +42,12 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        loadIpCam(binding.mjpegView)
+        loadIpCam()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.mjpegView.stopPlayback()
     }
 
     override fun onDestroyView() {
@@ -50,15 +55,15 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
-    private fun loadIpCam(mjpegView: MjpegView) {
+    private fun loadIpCam() {
         val streamURL = "http://192.168.68.18:8080/?action=stream"
         val timeout = 100
         Mjpeg.newInstance()
             .open(streamURL, timeout)
             .subscribe({
-                mjpegView.setSource(it)
-                mjpegView.setDisplayMode(DisplayMode.BEST_FIT)
-                mjpegView.showFps(true)
+                binding.mjpegView.setSource(it)
+                binding.mjpegView.setDisplayMode(DisplayMode.BEST_FIT)
+                binding.mjpegView.showFps(true)
             },
                 {
                     Log.e("loadIpCam", it.toString())

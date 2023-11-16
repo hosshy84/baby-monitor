@@ -1,11 +1,10 @@
 package com.example.babymonitor
 
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import android.widget.TextView
-import android.widget.Toast
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -15,8 +14,6 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.example.babymonitor.databinding.ActivityMainBinding
-import com.github.niqdev.mjpeg.DisplayMode
-import com.github.niqdev.mjpeg.Mjpeg
 import com.github.niqdev.mjpeg.MjpegView
 import java.time.LocalDate
 import java.time.Period
@@ -59,6 +56,20 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
     }
 
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.action_settings -> {
+            startActivity(Intent(applicationContext, SettingsActivity::class.java))
+            true
+        }
+
+        else -> {
+            // If we got here, the user's action was not recognized.
+            // Invoke the superclass to handle it.
+            super.onOptionsItemSelected(item)
+        }
+    }
+
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main, menu)
@@ -79,4 +90,20 @@ class MainActivity : AppCompatActivity() {
         val age = findViewById<TextView>(R.id.textAge)
         age.text = "${period.years}歳${period.months}か月${period.days}日(${days}日目)"
     }
+
+//    override fun onPreferenceStartFragment(caller: PreferenceFragmentCompat, pref: Preference): Boolean {
+//        // Instantiate the new Fragment
+//        val args = pref.extras
+//        val fragment = supportFragmentManager.fragmentFactory.instantiate(
+//            classLoader,
+//            pref.fragment)
+//        fragment.arguments = args
+//        fragment.setTargetFragment(caller, 0)
+//        // Replace the existing Fragment with the new Fragment
+//        supportFragmentManager.beginTransaction()
+//            .replace(R.id.settings_container, fragment)
+//            .addToBackStack(null)
+//            .commit()
+//        return true
+//    }
 }

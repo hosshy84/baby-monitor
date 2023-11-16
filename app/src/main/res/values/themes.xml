@@ -21,5 +21,5 @@
 
     <style name="Theme.BabyMonitor.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="Theme.BabyMonitor.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="Theme.BabyMonitor.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark" />
 </resources>

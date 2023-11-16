@@ -9,6 +9,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import com.example.babymonitor.databinding.FragmentHomeBinding
 import com.github.niqdev.mjpeg.DisplayMode
 import com.github.niqdev.mjpeg.Mjpeg
@@ -61,10 +62,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun loadIpCam() {
-        val streamURL = "http://192.168.68.18:8080/?action=stream"
-        val timeout = 100
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        val streamURL = sharedPreferences.getString("url", "")
         Mjpeg.newInstance()
-            .open(streamURL, timeout)
+            .open(streamURL, 10)
             .subscribe({
                 binding.mjpegView.setSource(it)
                 binding.mjpegView.setDisplayMode(DisplayMode.BEST_FIT)

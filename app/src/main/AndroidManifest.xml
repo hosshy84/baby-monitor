@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -14,10 +15,14 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="34">
         <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="@string/action_settings" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.BabyMonitor.NoActionBar"
-            android:label="@string/child_name">
+            android:label="@string/child_name"
+            android:theme="@style/Theme.BabyMonitor.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

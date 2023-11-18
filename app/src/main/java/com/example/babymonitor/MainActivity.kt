@@ -24,12 +24,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
-    private val mjpegView : MjpegView by lazy {
-        findViewById(R.id.mjpeg_view)
-    }
-    private val streamURL = "http://192.168.68.18:8080/?action=stream"
-    private val timeout = 100
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -49,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow
+                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow, R.id.nav_live
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -68,7 +62,6 @@ class MainActivity : AppCompatActivity() {
             super.onOptionsItemSelected(item)
         }
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -90,20 +83,4 @@ class MainActivity : AppCompatActivity() {
         val age = findViewById<TextView>(R.id.textAge)
         age.text = "${period.years}歳${period.months}か月${period.days}日(${days}日目)"
     }
-
-//    override fun onPreferenceStartFragment(caller: PreferenceFragmentCompat, pref: Preference): Boolean {
-//        // Instantiate the new Fragment
-//        val args = pref.extras
-//        val fragment = supportFragmentManager.fragmentFactory.instantiate(
-//            classLoader,
-//            pref.fragment)
-//        fragment.arguments = args
-//        fragment.setTargetFragment(caller, 0)
-//        // Replace the existing Fragment with the new Fragment
-//        supportFragmentManager.beginTransaction()
-//            .replace(R.id.settings_container, fragment)
-//            .addToBackStack(null)
-//            .commit()
-//        return true
-//    }
 }

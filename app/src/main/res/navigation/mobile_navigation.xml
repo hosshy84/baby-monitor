@@ -22,4 +22,10 @@
         android:name="com.example.babymonitor.ui.slideshow.SlideshowFragment"
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
+
+    <fragment
+        android:id="@+id/nav_live"
+        android:name="com.example.babymonitor.ui.live.LiveFragment"
+        android:label="@string/menu_live"
+        tools:layout="@layout/fragment_live" />
 </navigation>

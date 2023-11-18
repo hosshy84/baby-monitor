@@ -65,7 +65,7 @@ class HomeFragment : Fragment() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val streamURL = sharedPreferences.getString("url", "")
         Mjpeg.newInstance()
-            .open(streamURL, 10)
+            .open(streamURL, 100)
             .subscribe({
                 binding.mjpegView.setSource(it)
                 binding.mjpegView.setDisplayMode(DisplayMode.BEST_FIT)
@@ -73,7 +73,7 @@ class HomeFragment : Fragment() {
             },
                 {
                     Log.e("loadIpCam", it.toString())
-//                    Toast.makeText(this, "Error: $it", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Error: $it", Toast.LENGTH_LONG).show()
                 })
     }
 }

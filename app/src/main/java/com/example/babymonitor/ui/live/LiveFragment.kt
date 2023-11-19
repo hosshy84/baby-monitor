@@ -32,10 +32,6 @@ class LiveFragment : Fragment() {
     // onDestroyView.
     private val viewBinding get() = _binding!!
 
-//    private val viewBinding by lazy(LazyThreadSafetyMode.NONE) {
-//        FragmentLiveBinding.inflate(layoutInflater)
-//    }
-
     private var player: Player? = null
 
     private var playWhenReady = true
@@ -60,7 +56,7 @@ class LiveFragment : Fragment() {
 
     public override fun onResume() {
         super.onResume()
-        hideSystemUi()
+//        hideSystemUi()
         if (Build.VERSION.SDK_INT <= 23 || player == null) {
             initializePlayer()
         }

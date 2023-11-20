@@ -17,7 +17,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        app:srcCompat="@drawable/ic_volume_on" />
+        android:layout_marginBottom="16dp" />
 
 </FrameLayout>

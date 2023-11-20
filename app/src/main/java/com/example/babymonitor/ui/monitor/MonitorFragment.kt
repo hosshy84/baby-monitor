@@ -45,20 +45,21 @@ class MonitorFragment : Fragment() {
     ): View? {
         viewModel = ViewModelProvider(this)[MonitorViewModel::class.java]
         _binding = FragmentMonitorBinding.inflate(inflater, container, false)
-        val fab = viewBinding.mute
-        fab.setOnClickListener { _ ->
-            player.also { exoPlayer ->
-                if (currentVolume == null) {
-                    currentVolume = exoPlayer?.volume
-                    exoPlayer?.volume = 0f
-                    fab.setImageResource(R.drawable.ic_volume_off)
-                } else {
-                    exoPlayer?.volume = currentVolume!!
-                    currentVolume = null
-                    fab.setImageResource(R.drawable.ic_volume_on)
-                }
-            }
-        }
+        viewBinding.mute.setOnClickListener { _ -> toggleVolume() }
+//        val fab = viewBinding.mute
+//        fab.setOnClickListener { _ ->
+//            player.also { exoPlayer ->
+//                if (currentVolume == null) {
+//                    currentVolume = exoPlayer?.volume
+//                    exoPlayer?.volume = 0f
+//                    fab.setImageResource(R.drawable.ic_volume_off)
+//                } else {
+//                    exoPlayer?.volume = currentVolume!!
+//                    currentVolume = null
+//                    fab.setImageResource(R.drawable.ic_volume_on)
+//                }
+//            }
+//        }
         return viewBinding.root
     }
 
@@ -111,6 +112,13 @@ class MonitorFragment : Fragment() {
                 exoPlayer.playWhenReady = playWhenReady
                 exoPlayer.prepare()
             }
+
+        if (currentVolume == null) {
+            setVolumeImage(true)
+        } else {
+            player.also { exoPlayer -> exoPlayer?.volume = 0f }
+            setVolumeImage(false)
+        }
     }
 
     private fun releasePlayer() {
@@ -132,6 +140,25 @@ class MonitorFragment : Fragment() {
             controller.systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
+    }
+
+    private fun toggleVolume() {
+        player.also { exoPlayer ->
+            if (currentVolume == null) {
+                currentVolume = exoPlayer?.volume
+                exoPlayer?.volume = 0f
+                setVolumeImage(false)
+            } else {
+                exoPlayer?.volume = currentVolume!!
+                currentVolume = null
+                setVolumeImage(true)
+            }
+        }
+    }
+
+    private fun setVolumeImage(isOn: Boolean) {
+        val image = if (isOn) R.drawable.ic_volume_on else R.drawable.ic_volume_off
+        viewBinding.mute.setImageResource(image)
     }
 
 }

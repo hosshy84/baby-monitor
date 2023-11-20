@@ -37,6 +37,7 @@ class LiveFragment : Fragment() {
     private var playWhenReady = true
     private var mediaItemIndex = 0
     private var playbackPosition = 0L
+    private var currentVolume: Float? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,6 +45,20 @@ class LiveFragment : Fragment() {
     ): View? {
         viewModel = ViewModelProvider(this)[LiveViewModel::class.java]
         _binding = FragmentLiveBinding.inflate(inflater, container, false)
+        val fab = viewBinding.mute
+        fab.setOnClickListener { _ ->
+            player.also { exoPlayer ->
+                if (currentVolume == null) {
+                    currentVolume = exoPlayer?.volume
+                    exoPlayer?.volume = 0f
+                    fab.setImageResource(R.drawable.ic_audio_off)
+                } else {
+                    exoPlayer?.volume = currentVolume!!
+                    currentVolume = null
+                    fab.setImageResource(R.drawable.ic_audio_on)
+                }
+            }
+        }
         return viewBinding.root
     }
 

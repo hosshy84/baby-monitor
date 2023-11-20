@@ -1,4 +1,4 @@
-package com.example.babymonitor.ui.live
+package com.example.babymonitor.ui.monitor
 
 import android.annotation.SuppressLint
 import android.os.Build
@@ -16,17 +16,17 @@ import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.babymonitor.R
-import com.example.babymonitor.databinding.FragmentLiveBinding
+import com.example.babymonitor.databinding.FragmentMonitorBinding
 
-class LiveFragment : Fragment() {
+class MonitorFragment : Fragment() {
 
     companion object {
-        fun newInstance() = LiveFragment()
+        fun newInstance() = MonitorFragment()
     }
 
-    private lateinit var viewModel: LiveViewModel
+    private lateinit var viewModel: MonitorViewModel
 
-    private var _binding: FragmentLiveBinding? = null
+    private var _binding: FragmentMonitorBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -43,8 +43,8 @@ class LiveFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewModel = ViewModelProvider(this)[LiveViewModel::class.java]
-        _binding = FragmentLiveBinding.inflate(inflater, container, false)
+        viewModel = ViewModelProvider(this)[MonitorViewModel::class.java]
+        _binding = FragmentMonitorBinding.inflate(inflater, container, false)
         val fab = viewBinding.mute
         fab.setOnClickListener { _ ->
             player.also { exoPlayer ->

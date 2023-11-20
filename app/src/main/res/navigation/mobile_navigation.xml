@@ -24,8 +24,8 @@
         tools:layout="@layout/fragment_slideshow" />
 
     <fragment
-        android:id="@+id/nav_live"
-        android:name="com.example.babymonitor.ui.live.LiveFragment"
-        android:label="@string/menu_live"
-        tools:layout="@layout/fragment_live" />
+        android:id="@+id/nav_monitor"
+        android:name="com.example.babymonitor.ui.monitor.MonitorFragment"
+        android:label="@string/menu_monitor"
+        tools:layout="@layout/fragment_monitor" />
 </navigation>

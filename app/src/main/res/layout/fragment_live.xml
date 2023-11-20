@@ -18,6 +18,6 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        app:srcCompat="@drawable/ic_audio_on" />
+        app:srcCompat="@drawable/ic_volume_on" />
 
 </FrameLayout>

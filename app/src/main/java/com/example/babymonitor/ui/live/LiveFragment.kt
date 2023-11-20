@@ -51,11 +51,11 @@ class LiveFragment : Fragment() {
                 if (currentVolume == null) {
                     currentVolume = exoPlayer?.volume
                     exoPlayer?.volume = 0f
-                    fab.setImageResource(R.drawable.ic_audio_off)
+                    fab.setImageResource(R.drawable.ic_volume_off)
                 } else {
                     exoPlayer?.volume = currentVolume!!
                     currentVolume = null
-                    fab.setImageResource(R.drawable.ic_audio_on)
+                    fab.setImageResource(R.drawable.ic_volume_on)
                 }
             }
         }

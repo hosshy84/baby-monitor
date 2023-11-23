@@ -2,21 +2,25 @@ package com.example.babymonitor.ui.monitor
 
 import android.annotation.SuppressLint
 import android.os.Build
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.babymonitor.R
 import com.example.babymonitor.databinding.FragmentMonitorBinding
+import com.example.babymonitor.ui.zoom.ZoomGestureListener
+import com.example.babymonitor.ui.zoom.ZoomScaleGestureListener
 
 class MonitorFragment : Fragment() {
 
@@ -39,6 +43,10 @@ class MonitorFragment : Fragment() {
     private var playbackPosition = 0L
     private var currentVolume: Float? = null
 
+    private lateinit var gestureDetector: GestureDetectorCompat
+    private lateinit var scaleGestureDetector: ScaleGestureDetector
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -46,21 +54,20 @@ class MonitorFragment : Fragment() {
         viewModel = ViewModelProvider(this)[MonitorViewModel::class.java]
         _binding = FragmentMonitorBinding.inflate(inflater, container, false)
         viewBinding.mute.setOnClickListener { _ -> toggleVolume() }
-//        val fab = viewBinding.mute
-//        fab.setOnClickListener { _ ->
-//            player.also { exoPlayer ->
-//                if (currentVolume == null) {
-//                    currentVolume = exoPlayer?.volume
-//                    exoPlayer?.volume = 0f
-//                    fab.setImageResource(R.drawable.ic_volume_off)
-//                } else {
-//                    exoPlayer?.volume = currentVolume!!
-//                    currentVolume = null
-//                    fab.setImageResource(R.drawable.ic_volume_on)
-//                }
-//            }
-//        }
+        val zoomView = viewBinding.videoView
+        gestureDetector = GestureDetectorCompat(requireContext(), ZoomGestureListener(zoomView))
+        scaleGestureDetector = ScaleGestureDetector(requireContext(), ZoomScaleGestureListener(zoomView))
         return viewBinding.root
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewBinding.root.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+            scaleGestureDetector.onTouchEvent(event)
+            true
+        }
     }
 
     public override fun onStart() {

@@ -59,6 +59,7 @@ class MonitorFragment : Fragment() {
     private var currentVolume: Float? = null
 
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var httpMultiPart: HttpPostMultiPart
     private lateinit var gestureDetector: GestureDetectorCompat
     private lateinit var scaleGestureDetector: ScaleGestureDetector
 
@@ -66,11 +67,16 @@ class MonitorFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         viewModel = ViewModelProvider(this)[MonitorViewModel::class.java]
         _binding = FragmentMonitorBinding.inflate(inflater, container, false)
-        viewBinding.mute.setOnClickListener { _ -> toggleVolume() }
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        viewBinding.mute.setOnClickListener { _ ->
+            val isMute = sharedPreferences.getBoolean(getString(R.string.isMute_key), false)
+            toggleVolume(!isMute)
+        }
         viewBinding.capture.setOnClickListener { _ -> capture(requireContext(), viewBinding.videoView.videoSurfaceView as SurfaceView) }
+        httpMultiPart = HttpPostMultiPart(requireActivity().applicationContext)
         val zoomView = viewBinding.videoView
         gestureDetector = GestureDetectorCompat(requireContext(), ZoomGestureListener(zoomView))
         scaleGestureDetector = ScaleGestureDetector(requireContext(), ZoomScaleGestureListener(zoomView))
@@ -96,7 +102,6 @@ class MonitorFragment : Fragment() {
 
     public override fun onResume() {
         super.onResume()
-        loadSettings()
 //        hideSystemUi()
         if (Build.VERSION.SDK_INT <= 23 || player == null) {
             initializePlayer()
@@ -118,6 +123,7 @@ class MonitorFragment : Fragment() {
     }
 
     private fun initializePlayer() {
+        val url = sharedPreferences.getString(getString(R.string.streaming_url_key), "")!!
         // ExoPlayer implements the Player interface
         player = ExoPlayer.Builder(requireContext())
             .build()
@@ -130,7 +136,7 @@ class MonitorFragment : Fragment() {
                     .build()
 
                 val mediaItem = MediaItem.Builder()
-                    .setUri(getString(R.string.media_url_dash))
+                    .setUri(url)
                     .setMimeType(MimeTypes.APPLICATION_MPD)
                     .build()
                 exoPlayer.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
@@ -138,12 +144,8 @@ class MonitorFragment : Fragment() {
                 exoPlayer.prepare()
             }
 
-        if (currentVolume == null) {
-            setVolumeImage(true)
-        } else {
-            player.also { exoPlayer -> exoPlayer?.volume = 0f }
-            setVolumeImage(false)
-        }
+        val isMute = sharedPreferences.getBoolean(getString(R.string.isMute_key), false)
+        toggleVolume(isMute)
     }
 
     private fun releasePlayer() {
@@ -154,10 +156,6 @@ class MonitorFragment : Fragment() {
             player.release()
         }
         player = null
-    }
-
-    private fun loadSettings() {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
     }
 
     @SuppressLint("InlinedApi")
@@ -171,23 +169,16 @@ class MonitorFragment : Fragment() {
         }
     }
 
-    @OptIn(UnstableApi::class) private fun toggleVolume() {
+    @OptIn(UnstableApi::class) private fun toggleVolume(isMute: Boolean) {
         player.also { exoPlayer ->
-            if (currentVolume == null) {
-                currentVolume = exoPlayer?.volume
-                exoPlayer?.volume = 0f
-                setVolumeImage(false)
-            } else {
-                exoPlayer?.volume = currentVolume!!
-                currentVolume = null
-                setVolumeImage(true)
-            }
+            exoPlayer?.volume = if (isMute) 0f else 1f
+            sharedPreferences
+                .edit()
+                .putBoolean(getString(R.string.isMute_key), isMute)
+                .apply()
+            val image = if (isMute) R.drawable.ic_volume_off else R.drawable.ic_volume_on
+            viewBinding.mute.setImageResource(image)
         }
-    }
-
-    private fun setVolumeImage(isOn: Boolean) {
-        val image = if (isOn) R.drawable.ic_volume_on else R.drawable.ic_volume_off
-        viewBinding.mute.setImageResource(image)
     }
 
     private fun capture(context: Context, view: SurfaceView) {
@@ -206,7 +197,7 @@ class MonitorFragment : Fragment() {
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
                     outputStream.close()
                     postDate(file)
-                    Log.d("test", "${file.absolutePath}")
+                    Log.d("test", file.absolutePath)
                 } else {
                     Toast.makeText(context, "失敗しました", Toast.LENGTH_SHORT).show()
                 }
@@ -229,8 +220,7 @@ class MonitorFragment : Fragment() {
     }]
 }
 """)
-        val httpMultiPart = HttpPostMultiPart(requireActivity().applicationContext)
-        val url = sharedPreferences.getString("webhook_url", "")!!
+        val url = sharedPreferences.getString(getString(R.string.webhook_url_key), "")!!
         httpMultiPart.doUpload(url, filePart, stringPart)
     }
 

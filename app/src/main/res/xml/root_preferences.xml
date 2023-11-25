@@ -1,15 +1,28 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/menu_monitor">
+    <PreferenceCategory app:title="@string/menu_home">
 
         <EditTextPreference
             app:key="url"
             app:title="@string/url"
             app:useSimpleSummaryProvider="true" />
 
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/menu_monitor">
+
         <EditTextPreference
-            app:key="webhook_url"
-            app:title="@string/webhook_url"
+            app:key="@string/streaming_url_key"
+            app:title="@string/streaming_url_name"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="@string/webhook_url_key"
+            app:title="@string/webhook_url_name"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreferenceCompat
+            app:key="@string/isMute_key"
+            app:title="@string/isMute_name"
+            app:summary="チェックした場合、音声をOFFにします"
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>

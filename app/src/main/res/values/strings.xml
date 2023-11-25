@@ -17,7 +17,12 @@
 
     <!-- Messages Preferences -->
     <string name="url">URL</string>
-    <string name="webhook_url">Webhook URL</string>
+    <string name="streaming_url_key">streaming_url</string>
+    <string name="streaming_url_name">Streaming URL</string>
+    <string name="webhook_url_key">webhook_url</string>
+    <string name="webhook_url_name">Webhook URL</string>
+    <string name="isMute_key">is_mute</string>
+    <string name="isMute_name">ミュート</string>
 
     <!-- Sync Preferences -->
     <string name="sync_title">Sync email periodically</string>

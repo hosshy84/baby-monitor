@@ -1,12 +1,22 @@
 package com.example.babymonitor.ui.monitor
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.PixelCopy
 import android.view.ScaleGestureDetector
+import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.annotation.OptIn
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -16,11 +26,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.preference.PreferenceManager
 import com.example.babymonitor.R
+import com.example.babymonitor.data.http.HttpPostMultiPart
 import com.example.babymonitor.databinding.FragmentMonitorBinding
 import com.example.babymonitor.ui.zoom.ZoomGestureListener
 import com.example.babymonitor.ui.zoom.ZoomScaleGestureListener
+import java.io.File
+
 
 class MonitorFragment : Fragment() {
 
@@ -43,10 +58,11 @@ class MonitorFragment : Fragment() {
     private var playbackPosition = 0L
     private var currentVolume: Float? = null
 
+    private lateinit var sharedPreferences: SharedPreferences
     private lateinit var gestureDetector: GestureDetectorCompat
     private lateinit var scaleGestureDetector: ScaleGestureDetector
 
-    @SuppressLint("ClickableViewAccessibility")
+    @OptIn(UnstableApi::class)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -54,6 +70,7 @@ class MonitorFragment : Fragment() {
         viewModel = ViewModelProvider(this)[MonitorViewModel::class.java]
         _binding = FragmentMonitorBinding.inflate(inflater, container, false)
         viewBinding.mute.setOnClickListener { _ -> toggleVolume() }
+        viewBinding.capture.setOnClickListener { _ -> capture(requireContext(), viewBinding.videoView.videoSurfaceView as SurfaceView) }
         val zoomView = viewBinding.videoView
         gestureDetector = GestureDetectorCompat(requireContext(), ZoomGestureListener(zoomView))
         scaleGestureDetector = ScaleGestureDetector(requireContext(), ZoomScaleGestureListener(zoomView))
@@ -79,6 +96,7 @@ class MonitorFragment : Fragment() {
 
     public override fun onResume() {
         super.onResume()
+        loadSettings()
 //        hideSystemUi()
         if (Build.VERSION.SDK_INT <= 23 || player == null) {
             initializePlayer()
@@ -138,6 +156,10 @@ class MonitorFragment : Fragment() {
         player = null
     }
 
+    private fun loadSettings() {
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+    }
+
     @SuppressLint("InlinedApi")
     private fun hideSystemUi() {
         val window = requireActivity().window
@@ -149,7 +171,7 @@ class MonitorFragment : Fragment() {
         }
     }
 
-    private fun toggleVolume() {
+    @OptIn(UnstableApi::class) private fun toggleVolume() {
         player.also { exoPlayer ->
             if (currentVolume == null) {
                 currentVolume = exoPlayer?.volume
@@ -166,6 +188,50 @@ class MonitorFragment : Fragment() {
     private fun setVolumeImage(isOn: Boolean) {
         val image = if (isOn) R.drawable.ic_volume_on else R.drawable.ic_volume_off
         viewBinding.mute.setImageResource(image)
+    }
+
+    private fun capture(context: Context, view: SurfaceView) {
+        val bitmap = Bitmap.createBitmap(
+            view.width,
+            view.height,
+            Bitmap.Config.ARGB_8888
+        )
+        PixelCopy.request(
+            view,
+            bitmap,
+            { result ->
+                if (result == PixelCopy.SUCCESS) {
+                    val file = File(context.filesDir, "temp.png")
+                    val outputStream = file.outputStream()
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                    outputStream.close()
+                    postDate(file)
+                    Log.d("test", "${file.absolutePath}")
+                } else {
+                    Toast.makeText(context, "失敗しました", Toast.LENGTH_SHORT).show()
+                }
+            },
+            Handler(Looper.myLooper()!!)
+        )
+    }
+
+    private fun postDate(file: File) {
+        val filePart = mapOf("file1" to file)
+        val stringPart = mapOf("payload_json" to """
+{
+    "content": "現在の${getText(R.string.baby_name)}の様子",
+    "embeds": [
+    {
+        "title": "",
+        "image": {
+            "url": "attachment://${file.name}"
+        }
+    }]
+}
+""")
+        val httpMultiPart = HttpPostMultiPart(requireActivity().applicationContext)
+        val url = sharedPreferences.getString("webhook_url", "")!!
+        httpMultiPart.doUpload(url, filePart, stringPart)
     }
 
 }

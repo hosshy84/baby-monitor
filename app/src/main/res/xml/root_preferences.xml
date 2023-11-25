@@ -7,6 +7,11 @@
             app:title="@string/url"
             app:useSimpleSummaryProvider="true" />
 
+        <EditTextPreference
+            app:key="webhook_url"
+            app:title="@string/webhook_url"
+            app:useSimpleSummaryProvider="true" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

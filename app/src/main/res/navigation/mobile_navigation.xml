@@ -7,25 +7,25 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="com.example.babymonitor.ui.home.HomeFragment"
+        android:name="com.tatsuya.babymonitor.ui.home.HomeFragment"
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/nav_gallery"
-        android:name="com.example.babymonitor.ui.gallery.GalleryFragment"
+        android:name="com.tatsuya.babymonitor.ui.gallery.GalleryFragment"
         android:label="@string/menu_gallery"
         tools:layout="@layout/fragment_gallery" />
 
     <fragment
         android:id="@+id/nav_slideshow"
-        android:name="com.example.babymonitor.ui.slideshow.SlideshowFragment"
+        android:name="com.tatsuya.babymonitor.ui.slideshow.SlideshowFragment"
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
 
     <fragment
-        android:id="@+id/nav_monitor"
-        android:name="com.example.babymonitor.ui.monitor.MonitorFragment"
-        android:label="@string/menu_monitor"
-        tools:layout="@layout/fragment_monitor" />
+        android:id="@+id/nav_live"
+        android:name="com.tatsuya.babymonitor.ui.live.LiveFragment"
+        android:label="@string/menu_live"
+        tools:layout="@layout/fragment_live" />
 </navigation>

@@ -9,11 +9,11 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/menu_monitor">
+    <PreferenceCategory app:title="@string/menu_live">
 
         <EditTextPreference
-            app:key="@string/streaming_url_key"
-            app:title="@string/streaming_url_name"
+            app:key="@string/live_url_key"
+            app:title="@string/live_url_name"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
             app:key="@string/webhook_url_key"

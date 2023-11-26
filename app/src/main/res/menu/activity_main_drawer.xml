@@ -18,8 +18,8 @@
             android:title="@string/menu_slideshow" />
 
         <item
-            android:id="@+id/nav_monitor"
-            android:icon="@drawable/ic_menu_monitor"
-            android:title="@string/menu_monitor" />
+            android:id="@+id/nav_live"
+            android:icon="@drawable/ic_menu_live"
+            android:title="@string/menu_live" />
     </group>
 </menu>

@@ -11,14 +11,12 @@
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
-    <string name="menu_monitor">Monitor</string>
-
-    <string name="media_url_dash"><![CDATA[https://www.youtube.com/api/manifest/dash/id/bf5bb2419360daf1/source/youtube?as=fmp4_audio_clear,fmp4_sd_hd_clear&sparams=ip,ipbits,expire,source,id,as&ip=0.0.0.0&ipbits=0&expire=19000000000&signature=51AF5F39AB0CEC3E5497CD9C900EBFEAECCCB5C7.8506521BFC350652163895D4C26DEE124209AA9E&key=ik0]]></string>
+    <string name="menu_live">Live</string>
 
     <!-- Messages Preferences -->
     <string name="url">URL</string>
-    <string name="streaming_url_key">streaming_url</string>
-    <string name="streaming_url_name">Streaming URL</string>
+    <string name="live_url_key">live_url</string>
+    <string name="live_url_name">Live URL</string>
     <string name="webhook_url_key">webhook_url</string>
     <string name="webhook_url_name">Webhook URL</string>
     <string name="isMute_key">is_mute</string>

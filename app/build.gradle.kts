@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.babymonitor"
+    namespace = "com.tatsuya.babymonitor"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.babymonitor"
+        applicationId = "com.tatsuya.babymonitor"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

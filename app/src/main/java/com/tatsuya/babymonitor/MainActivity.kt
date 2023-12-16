@@ -1,13 +1,11 @@
 package com.tatsuya.babymonitor
 
 import android.content.Intent
-import android.content.IntentSender.SendIntentException
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
@@ -15,27 +13,30 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.gms.auth.api.identity.AuthorizationRequest
-import com.google.android.gms.auth.api.identity.AuthorizationResult
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.Scope
 import com.google.android.material.navigation.NavigationView
-import com.google.api.gax.core.FixedCredentialsProvider
-import com.google.auth.oauth2.AccessToken
-import com.google.auth.oauth2.GoogleCredentials
-import com.google.photos.library.v1.PhotosLibraryClient
-import com.google.photos.library.v1.PhotosLibrarySettings
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.auth
 import com.tatsuya.babymonitor.databinding.ActivityMainBinding
 import java.time.LocalDate
 import java.time.Period
 import java.time.temporal.ChronoUnit
 
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    private val REQUEST_AUTHORIZE = 123
+    private lateinit var oneTapClient: SignInClient
+    private lateinit var signInRequest: BeginSignInRequest
+    private lateinit var auth: FirebaseAuth
+    private val REQ_ONE_TAP = 2  // Can be any integer unique to the Activity
+    private var showOneTapUI = true
     private val Scope : String = "https://www.googleapis.com/auth/photoslibrary.readonly"
     private val TAG = "LOGIN"
 
@@ -63,10 +64,47 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-//        navController.setGraph()
 
-//        GoogleSignIn.getClient(this, GoogleSignInOptions.DEFAULT_SIGN_IN).signOut()
-//        signIn()
+        oneTapClient = Identity.getSignInClient(this)
+        signInRequest = BeginSignInRequest.builder()
+            .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
+                .setSupported(true)
+                .build())
+            .setGoogleIdTokenRequestOptions(
+                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                    .setSupported(true)
+                    // Your server's client ID, not your Android client ID.
+                    .setServerClientId("816428283482-naq80ncb54g4d62jnrncn8gr9opt79g3.apps.googleusercontent.com")
+                    // Only show accounts previously used to sign in.
+                    .setFilterByAuthorizedAccounts(true)
+                    .build())
+            // Automatically sign in when exactly one credential is retrieved.
+            .setAutoSelectEnabled(true)
+            .build()
+//        oneTapClient.beginSignIn(signInRequest)
+//            .addOnSuccessListener(this) { result ->
+//                try {
+//                    startIntentSenderForResult(
+//                        result.pendingIntent.intentSender, REQ_ONE_TAP,
+//                        null, 0, 0, 0, null)
+//                } catch (e: IntentSender.SendIntentException) {
+//                    Log.e(TAG, "Couldn't start One Tap UI: ${e.localizedMessage}")
+//                }
+//            }
+//            .addOnFailureListener(this) { e ->
+//                // No saved credentials found. Launch the One Tap sign-up flow, or
+//                // do nothing and continue presenting the signed-out UI.
+//                Log.d(TAG, e.localizedMessage)
+//            }
+        auth = Firebase.auth
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Check if user is signed in (non-null) and update UI accordingly.
+        val currentUser = auth.currentUser
+        Log.d(TAG, currentUser?.displayName ?: "no user")
+//        updateUI(currentUser)
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
@@ -108,74 +146,40 @@ class MainActivity : AppCompatActivity() {
 
         Log.d(TAG, "requestCode:${requestCode}")
         when (requestCode) {
-            REQUEST_AUTHORIZE -> {
-                val authorizationResult = Identity.getAuthorizationClient(this)
-                    .getAuthorizationResultFromIntent(data)
-                Log.d(TAG, "authorizationResult:${authorizationResult.accessToken}")
-                test(authorizationResult.accessToken!!)
-            }
-        }
-    }
+            REQ_ONE_TAP -> {
+                try {
+                    val credential = oneTapClient.getSignInCredentialFromIntent(data)
+                    val idToken = credential.googleIdToken
+                    when {
+                        idToken != null -> {
+                            // Got an ID token from Google. Use it to authenticate
+                            // with Firebase.
+                            val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+                            auth.signInWithCredential(firebaseCredential)
+                                .addOnCompleteListener(this) { task ->
+                                    if (task.isSuccessful) {
+                                        // Sign in success, update UI with the signed-in user's information
+                                        Log.d(TAG, "signInWithCredential:success")
+                                        val user = auth.currentUser
+//                                        updateUI(user)
+                                    } else {
+                                        // If sign in fails, display a message to the user.
+                                        Log.w(TAG, "signInWithCredential:failure", task.exception)
+//                                        updateUI(null)
+                                    }
+                                }
+                        }
 
-    private fun signIn() {
-        val requestedScopes = listOf(Scope(Scope))
-        val authorizationRequest =
-            AuthorizationRequest.builder().setRequestedScopes(requestedScopes).build()
-        Identity.getAuthorizationClient(this)
-            .authorize(authorizationRequest)
-            .addOnSuccessListener { authorizationResult: AuthorizationResult ->
-                if (authorizationResult.hasResolution()) {
-                    // Access needs to be granted by the user
-                    val pendingIntent = authorizationResult.pendingIntent
-                    try {
-                        startIntentSenderForResult(
-                            pendingIntent!!.intentSender,
-                            REQUEST_AUTHORIZE, null, 0, 0, 0, null
-                        )
-                    } catch (e: SendIntentException) {
-                        Log.e(
-                            TAG,
-                            "Couldn't start Authorization UI: " + e.localizedMessage
-                        )
+                        else -> {
+                            // Shouldn't happen.
+                            Log.d(TAG, "No ID token!")
+                        }
                     }
-                } else {
-                    // Access already granted, continue with user action
-                    Log.d(TAG, "Access already granted:${authorizationResult.accessToken}")
-                    test(authorizationResult.accessToken!!)
+                } catch (e: ApiException) {
+                    // ...
+                    Log.e(TAG, e.localizedMessage)
                 }
             }
-            .addOnFailureListener { e: Exception? ->
-                Log.e(
-                    TAG,
-                    "Failed to authorize",
-                    e
-                )
-            }
-    }
-
-    private fun test(token: String) {
-        val accessToken = AccessToken.newBuilder().setTokenValue(token).build()
-        Log.d(TAG, "accessToken:${accessToken.tokenValue}")
-        val credentials = GoogleCredentials.newBuilder()
-            .setAccessToken(accessToken)
-            .build()
-        val settings = PhotosLibrarySettings.newBuilder()
-            .setCredentialsProvider(
-                FixedCredentialsProvider.create(credentials)
-            )
-            .build()
-
-        try {
-            PhotosLibraryClient.initialize(settings).use { photosLibraryClient ->
-
-                // Create a new Album  with at title
-                val albums = photosLibraryClient.listAlbums()
-                Toast.makeText(this, "Done!", Toast.LENGTH_SHORT).show()
-                Log.d("Photos", "${albums.iterateAll().count()}")
-//                            albums.iterateAll().forEach { album -> Log.d("test", album.title) }
-            }
-        } catch (e: ApiException) {
-            // Error during album creation
         }
     }
 }

@@ -56,7 +56,6 @@ class LiveFragment : Fragment() {
     private var playWhenReady = true
     private var mediaItemIndex = 0
     private var playbackPosition = 0L
-    private var currentVolume: Float? = null
 
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var httpMultiPart: HttpPostMultiPart
@@ -75,8 +74,8 @@ class LiveFragment : Fragment() {
             val isMute = sharedPreferences.getBoolean(getString(R.string.isMute_key), false)
             toggleVolume(!isMute)
         }
-        viewBinding.capture.setOnClickListener { _ -> capture(requireContext(), viewBinding.videoView.videoSurfaceView as SurfaceView) }
         httpMultiPart = HttpPostMultiPart(requireActivity().applicationContext)
+        viewBinding.capture.setOnClickListener { _ -> capture(requireContext(), viewBinding.videoView.videoSurfaceView as SurfaceView) }
         val zoomView = viewBinding.videoView
         gestureDetector = GestureDetectorCompat(requireContext(), ZoomGestureListener(zoomView))
         scaleGestureDetector = ScaleGestureDetector(requireContext(), ZoomScaleGestureListener(zoomView))

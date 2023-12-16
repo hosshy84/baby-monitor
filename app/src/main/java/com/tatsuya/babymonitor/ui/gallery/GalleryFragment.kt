@@ -1,19 +1,24 @@
 package com.tatsuya.babymonitor.ui.gallery
 
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.ImageView
-import android.widget.VideoView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -231,8 +236,8 @@ class MediaItemAdapter(private val mediaItems: List<MediaItem>, private val cont
         Log.d("View", "uri:${uri}")
 
         val imageView = holder.imageView
-        val videoView = holder.videoView
-        val isImage = mediaItem.mimeType.startsWith("image")
+//        val videoView = holder.videoView
+        val isImage = mediaItem.mimeType.startsWith("image") || true
         if (isImage) {
             Glide.with(context)
                 .load(uri)
@@ -240,10 +245,40 @@ class MediaItemAdapter(private val mediaItems: List<MediaItem>, private val cont
 //            imageView.visibility = View.VISIBLE
 //            videoView.visibility = View.INVISIBLE
         } else {
-            videoView.setVideoURI(uri)
-            videoView.start()
+//            videoView.setVideoURI(Uri.parse("${mediaItem.baseUrl}=dv"))
+//            videoView.start()
 //            imageView.visibility = View.INVISIBLE
 //            videoView.visibility = View.VISIBLE
+        }
+
+        holder.itemView.setOnClickListener {
+            val dialog = Dialog(context)
+            dialog.window?.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT)
+            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            if (mediaItem.mimeType.startsWith("image")) {
+                dialog.setContentView(R.layout.dialog_image)
+                val dialogImageView = dialog.findViewById<ImageView>(R.id.imageView)
+                Glide.with(context)
+                    .load(uri)
+                    .into(dialogImageView)
+            } else {
+                dialog.setContentView(R.layout.dialog_video)
+//                val dialogVideoView = dialog.findViewById<VideoView>(R.id.videoView)
+//                dialogVideoView.setVideoURI(Uri.parse("${mediaItem.baseUrl}=dv"))
+//                dialogVideoView.start()
+                // VideoView を取得する
+                val playerView = dialog.findViewById<PlayerView>(R.id.videoView)
+                val player = ExoPlayer.Builder(context).build()
+                playerView.player = player;
+                // .mov ファイルの URL を設定する
+                val videoUri = Uri.parse("${mediaItem.baseUrl}=dv")
+
+                val mediaItem: androidx.media3.common.MediaItem = androidx.media3.common.MediaItem.fromUri(videoUri)
+                player.setMediaItem(mediaItem)
+                player.prepare()
+                player.play()
+            }
+            dialog.show()
         }
     }
 
@@ -253,6 +288,6 @@ class MediaItemAdapter(private val mediaItems: List<MediaItem>, private val cont
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imageView: ImageView = view.findViewById(R.id.imageView)
-        val videoView: VideoView = view.findViewById(R.id.videoView)
+//        val videoView: VideoView = view.findViewById(R.id.videoView)
     }
 }

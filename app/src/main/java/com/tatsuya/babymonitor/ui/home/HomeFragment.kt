@@ -1,5 +1,6 @@
 package com.tatsuya.babymonitor.ui.home
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
@@ -9,10 +10,12 @@ import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.PixelCopy
+import android.view.ScaleGestureDetector
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.GestureDetectorCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
@@ -21,6 +24,8 @@ import com.github.niqdev.mjpeg.Mjpeg
 import com.tatsuya.babymonitor.R
 import com.tatsuya.babymonitor.data.http.HttpPostMultiPart
 import com.tatsuya.babymonitor.databinding.FragmentHomeBinding
+import com.tatsuya.babymonitor.ui.zoom.ZoomGestureListener
+import com.tatsuya.babymonitor.ui.zoom.ZoomScaleGestureListener
 import java.io.File
 
 class HomeFragment : Fragment() {
@@ -33,6 +38,8 @@ class HomeFragment : Fragment() {
 
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var httpMultiPart: HttpPostMultiPart
+    private lateinit var gestureDetector: GestureDetectorCompat
+    private lateinit var scaleGestureDetector: ScaleGestureDetector
     private var canCapture = true
 
     override fun onCreateView(
@@ -53,7 +60,20 @@ class HomeFragment : Fragment() {
 //        }
         httpMultiPart = HttpPostMultiPart(requireActivity().applicationContext)
         binding.fab.setOnClickListener { _ -> capture(requireContext(), binding.mjpegView) }
+        val zoomView = binding.mjpegView
+        gestureDetector = GestureDetectorCompat(requireContext(), ZoomGestureListener(zoomView))
+        scaleGestureDetector = ScaleGestureDetector(requireContext(), ZoomScaleGestureListener(zoomView))
         return root
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.root.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+            scaleGestureDetector.onTouchEvent(event)
+            true
+        }
     }
 
     override fun onResume() {

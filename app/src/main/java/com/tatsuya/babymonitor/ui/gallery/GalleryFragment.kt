@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -19,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -51,9 +53,7 @@ class GalleryFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
     private lateinit var _context: Context
-
-    private val imageUris = mutableListOf<Uri>()
-
+    private lateinit var sharedPreferences: SharedPreferences
 
     companion object {
         const val REQUEST_AUTHORIZE = 123
@@ -72,6 +72,7 @@ class GalleryFragment : Fragment() {
             ViewModelProvider(this).get(GalleryViewModel::class.java)
 
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(_context)
         val root: View = binding.root
 
 //        val textView: TextView = binding.textGallery
@@ -194,13 +195,7 @@ class GalleryFragment : Fragment() {
 
                 Log.d("Photos", "Start")
                 // Create a new Album  with at title
-                val albumId =
-                    "AJpk6ZhLuc2F3-wf7jyYbuJh2d5JD8o2vvHqjJw4FUUOpzn6gw0y3XqNv64xllpjM2paBKhPRk1Z"
-                val albumId2 =
-                    "AJpk6ZiS8T1CmcKN1h9NeB7F0YtjP-5uSXj0akY11v71wdk06Gvlc_y7bmF88xAFwCBhTAKOrQtG"
-                val albumId3 =
-                    "AJpk6ZjtYKAMOdsUpC-cRgp9Vy0ZTgsRKSbUNn1uPKagVrb1njGAhMAsvikkpPBcEhOKgMG7LJf-"
-
+                val albumId = sharedPreferences.getString(getString(R.string.album_id_key), "")!!
                 val options = SearchMediaItemsRequest.newBuilder()
                     .setAlbumId(albumId)
                     .setPageSize(10)

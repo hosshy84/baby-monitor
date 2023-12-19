@@ -1,6 +1,8 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/menu_home">
+    <PreferenceCategory
+        app:title="@string/menu_home"
+        app:icon="@drawable/ic_menu_camera">
 
         <EditTextPreference
             app:key="url"
@@ -9,7 +11,9 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/menu_live">
+    <PreferenceCategory
+        app:title="@string/menu_live"
+        app:icon="@drawable/ic_menu_live">
 
         <EditTextPreference
             app:key="@string/live_url_key"
@@ -23,6 +27,17 @@
             app:key="@string/isMute_key"
             app:title="@string/isMute_name"
             app:summary="チェックした場合、音声をOFFにします"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/menu_gallery"
+        app:icon="@drawable/ic_menu_gallery">
+
+        <EditTextPreference
+            app:key="@string/album_id_key"
+            app:title="@string/album_id_name"
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>

@@ -1,12 +1,30 @@
+
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
 }
 
+// Creates a variable called keystorePropertiesFile, and initializes it to the
+// keystore.properties file.
+val keystorePropertiesFile: File = rootProject.file("keystore.properties")
+
+// Initializes a new Properties() object called keystoreProperties.
+val keystoreProperties = Properties()
+
+// Loads the keystore.properties file into the keystoreProperties object.
+keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+
 android {
     namespace = "com.tatsuya.babymonitor"
     compileSdk = 34
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         applicationId = "com.tatsuya.babymonitor"
@@ -19,12 +37,19 @@ android {
     }
 
     buildTypes {
+        val serverClientId = "\"${keystoreProperties["SERVER_CLIENT_ID"]}\""
+
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "SERVER_CLIENT_ID", serverClientId)
+        }
+
+        debug {
+            buildConfigField("String", "SERVER_CLIENT_ID", serverClientId)
         }
     }
     compileOptions {

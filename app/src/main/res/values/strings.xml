@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Baby Monitor</string>
+    <string name="app_name">凛ちゃんねる</string>
     <string name="baby_name">凛</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -10,7 +10,7 @@
 
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
+    <string name="menu_profile">Profile</string>
     <string name="menu_live">Live</string>
 
     <!-- Messages Preferences -->

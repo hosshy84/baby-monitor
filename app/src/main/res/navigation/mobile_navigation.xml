@@ -16,16 +16,13 @@
         android:name="com.tatsuya.babymonitor.ui.gallery.GalleryFragment"
         android:label="@string/menu_gallery"
         tools:layout="@layout/fragment_gallery" >
-        <argument
-            android:name="nameForConfirm"
-            app:argType="string"/>
     </fragment>
 
     <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.tatsuya.babymonitor.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        android:id="@+id/nav_profile"
+        android:name="com.tatsuya.babymonitor.ui.profile.ProfileFragment"
+        android:label="@string/menu_profile"
+        tools:layout="@layout/fragment_profile" />
 
     <fragment
         android:id="@+id/nav_live"

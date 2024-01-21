@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:keepScreenOn="true"
+    android:background="#000000"
     tools:context=".ui.home.HomeFragment">
 
     <!--    <TextView-->
@@ -33,5 +34,6 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        android:contentDescription="@string/label_capture"
         app:srcCompat="@drawable/ic_menu_camera" />
 </FrameLayout>

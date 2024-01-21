@@ -13,6 +13,10 @@ class ZoomGestureListener(private val view: View) : GestureDetector.SimpleOnGest
         return true
     }
 
+    override fun onDown(e: MotionEvent): Boolean {
+        return true
+    }
+
     override fun onScroll(
         e1: MotionEvent?,
         e2: MotionEvent,

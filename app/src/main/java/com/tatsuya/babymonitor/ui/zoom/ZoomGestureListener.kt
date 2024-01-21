@@ -8,6 +8,23 @@ class ZoomGestureListener(private val view: View) : GestureDetector.SimpleOnGest
     override fun onDoubleTap(e: MotionEvent): Boolean {
         view.scaleX = 1.0f
         view.scaleY = 1.0f
+        view.translationX = 0f
+        view.translationY = 0f
+        return true
+    }
+
+    override fun onScroll(
+        e1: MotionEvent?,
+        e2: MotionEvent,
+        distanceX: Float,
+        distanceY: Float
+    ): Boolean {
+        if (view.scaleX == 1.0f && view.scaleY == 1.0f) {
+            return true
+        }
+
+        view.translationX -= distanceX
+        view.translationY -= distanceY
         return true
     }
 }

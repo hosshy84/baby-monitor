@@ -12,6 +12,8 @@
     <string name="menu_gallery">Gallery</string>
     <string name="menu_profile">Profile</string>
     <string name="menu_live">Live</string>
+    <string name="menu_live2">Live 2 (MediaPlayer)</string>
+    <string name="menu_live3">Live 3 (ExoPlayer)</string>
 
     <!-- Messages Preferences -->
     <string name="url">URL</string>

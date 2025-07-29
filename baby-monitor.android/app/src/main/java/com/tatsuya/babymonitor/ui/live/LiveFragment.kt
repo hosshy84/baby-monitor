@@ -27,7 +27,10 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.rtsp.RtspMediaSource
+import androidx.media3.exoplayer.source.MediaSource
 import androidx.preference.PreferenceManager
 import com.tatsuya.babymonitor.R
 import com.tatsuya.babymonitor.data.http.HttpPostMultiPart
@@ -121,25 +124,44 @@ class LiveFragment : Fragment() {
         }
     }
 
+    @OptIn(UnstableApi::class)
     private fun initializePlayer() {
-        val url = sharedPreferences.getString(getString(R.string.live_url_key), "")!!
+        val url = sharedPreferences.getString(getString(R.string.live_url_key), "rtsp://192.168.68.19:8554/stream")!!
+//        val url = "rtsp://192.168.68.19:8554/stream1"
+//        val url = "http://192.168.68.19:8080/stream.mpd"
+        val mediaItem = MediaItem.fromUri(url)
         // ExoPlayer implements the Player interface
         player = ExoPlayer.Builder(requireContext())
             .build()
             .also { exoPlayer ->
                 viewBinding.videoView.player = exoPlayer
                 // Update the track selection parameters to only pick standard definition tracks
-                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
-                    .buildUpon()
-                    .setMaxVideoSizeSd()
-                    .build()
+//                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
+//                    .buildUpon()
+//                    .setMaxVideoSizeSd()
+//                    .build()
 
-                val mediaItem = MediaItem.Builder()
-                    .setUri(url)
-                    .setMimeType(MimeTypes.APPLICATION_MPD)
-                    .build()
-                exoPlayer.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
-                exoPlayer.playWhenReady = playWhenReady
+//                val mediaItem = MediaItem.Builder()
+//                    .setUri(url)
+//                    .setMimeType(MimeTypes.APPLICATION_RTSP)
+//                    .setLiveConfiguration(MediaItem.LiveConfiguration.Builder().build())
+//                    .build()
+//                exoPlayer.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
+//                exoPlayer.setMediaItem(MediaItem.fromUri(url))
+//                exoPlayer.playWhenReady = playWhenReady
+                val mediaSource: MediaSource =
+                    RtspMediaSource.Factory()
+                        // 必要に応じてタイムアウト設定などを追加できます
+                        // .setTimeoutMs(10000) // タイムアウトを10秒に設定 (例)
+//                        .setForceUseRtpTcp(false)
+                        .setDebugLoggingEnabled(true) // デバッグログを有効化 (問題切り分けに役立つ)
+//                        .setTimeoutMs(20000)
+//                    DashMediaSource
+//                        .Factory(DefaultHttpDataSource.Factory())
+                        .createMediaSource(MediaItem.fromUri(url))
+//                exoPlayer.setMediaSource(mediaSource)
+                exoPlayer.setMediaItem(mediaItem)
+                exoPlayer.playWhenReady = true
                 exoPlayer.prepare()
             }
 

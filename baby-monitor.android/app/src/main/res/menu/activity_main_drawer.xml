@@ -21,5 +21,13 @@
             android:id="@+id/nav_live"
             android:icon="@drawable/ic_menu_live"
             android:title="@string/menu_live" />
+        <item
+            android:id="@+id/nav_live2"
+            android:icon="@drawable/ic_menu_live"
+            android:title="@string/menu_live2" />
+        <item
+            android:id="@+id/nav_live3"
+            android:icon="@drawable/ic_menu_live"
+            android:title="@string/menu_live3" />
     </group>
 </menu>

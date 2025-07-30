@@ -30,16 +30,5 @@
         android:label="@string/menu_live"
         tools:layout="@layout/fragment_live" />
 
-    <fragment
-        android:id="@+id/nav_live2"
-        android:name="com.tatsuya.babymonitor.ui.live.Live2Fragment"
-        android:label="@string/menu_live2"
-        tools:layout="@layout/fragment_live2" />
-
-    <fragment
-        android:id="@+id/nav_live3"
-        android:name="com.tatsuya.babymonitor.ui.live.Live3Fragment"
-        android:label="@string/menu_live3"
-        tools:layout="@layout/fragment_live3" />
 
 </navigation>

@@ -97,31 +97,24 @@ class LiveFragment : Fragment() {
 
     public override fun onStart() {
         super.onStart()
-        if (Build.VERSION.SDK_INT > 23) {
-            initializePlayer()
-        }
+        initializePlayer()
     }
 
     public override fun onResume() {
         super.onResume()
 //        hideSystemUi()
-        if (Build.VERSION.SDK_INT <= 23 || player == null) {
+        if (player == null) {
             initializePlayer()
         }
     }
 
     public override fun onPause() {
         super.onPause()
-        if (Build.VERSION.SDK_INT <= 23) {
-            releasePlayer()
-        }
     }
 
     public override fun onStop() {
         super.onStop()
-        if (Build.VERSION.SDK_INT > 23) {
-            releasePlayer()
-        }
+        releasePlayer()
     }
 
     @OptIn(UnstableApi::class)

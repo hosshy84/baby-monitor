@@ -1,16 +1,13 @@
 *.iml
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
 local.properties
 /keystore.properties
+
+# Android Studio / IntelliJ IDEA
+baby-monitor.android/.idea/
+baby-monitor.android/build/
+baby-monitor.android/captures/
+baby-monitor.android/.externalNativeBuild/
+baby-monitor.android/.cxx/

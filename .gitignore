@@ -1,13 +1,12 @@
 *.iml
-.gradle
-/local.properties
 .DS_Store
-local.properties
-/keystore.properties
 
 # Android Studio / IntelliJ IDEA
+baby-monitor.android/.cxx/
+baby-monitor.android/.externalNativeBuild/
+baby-monitor.android/.gradle
 baby-monitor.android/.idea/
 baby-monitor.android/build/
 baby-monitor.android/captures/
-baby-monitor.android/.externalNativeBuild/
-baby-monitor.android/.cxx/
+baby-monitor.android/keystore.properties
+baby-monitor.android/local.properties

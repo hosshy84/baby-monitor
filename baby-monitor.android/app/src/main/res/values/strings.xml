@@ -17,8 +17,11 @@
 
     <!-- Messages Preferences -->
     <string name="url">URL</string>
-    <string name="live_url_key">live_url</string>
-    <string name="live_url_name">Live URL</string>
+    <string name="live_url_living_key">live_url_living</string>
+    <string name="live_url_living_name">Living URL</string>
+    <string name="live_url_bedroom_key">live_url_bedroom</string>
+    <string name="live_url_bedroom_name">Bedroom URL</string>
+    <string name="current_live_location_key">current_live_location</string>
     <string name="webhook_url_key">webhook_url</string>
     <string name="webhook_url_name">Webhook URL</string>
     <string name="isMute_key">is_mute</string>

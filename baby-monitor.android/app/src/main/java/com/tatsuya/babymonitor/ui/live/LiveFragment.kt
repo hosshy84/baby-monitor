@@ -56,6 +56,7 @@ class LiveFragment : Fragment() {
     private var playbackPosition = 0L
 
     private lateinit var sharedPreferences: SharedPreferences
+    private var currentLocation = "" // SharedPreferences key for current location
     private lateinit var httpMultiPart: HttpPostMultiPart
     private lateinit var gestureDetector: GestureDetectorCompat
     private lateinit var scaleGestureDetector: ScaleGestureDetector
@@ -74,6 +75,7 @@ class LiveFragment : Fragment() {
         }
         httpMultiPart = HttpPostMultiPart(requireActivity().applicationContext)
         viewBinding.capture.setOnClickListener { _ -> capture(requireContext(), viewBinding.videoView.videoSurfaceView as SurfaceView) }
+        viewBinding.locationSwitch.setOnClickListener { _ -> switchLocation() }
         val zoomView = viewBinding.videoView
         gestureDetector = GestureDetectorCompat(requireContext(), ZoomGestureListener(zoomView))
         scaleGestureDetector = ScaleGestureDetector(requireContext(), ZoomScaleGestureListener(zoomView))
@@ -113,7 +115,10 @@ class LiveFragment : Fragment() {
 
     @OptIn(UnstableApi::class)
     private fun initializePlayer() {
-        val url = sharedPreferences.getString(getString(R.string.live_url_key), "")!!
+        // Load current location from SharedPreferences
+        currentLocation = sharedPreferences.getString(getString(R.string.current_live_location_key), getString(R.string.live_url_living_key))!!
+        val url = sharedPreferences.getString(currentLocation, "")!!
+        updateLocationIcon()
         val mediaItem = MediaItem.fromUri(url)
         // ExoPlayer implements the Player interface
         player = ExoPlayer.Builder(requireContext())
@@ -198,6 +203,37 @@ class LiveFragment : Fragment() {
 """)
         val url = sharedPreferences.getString(getString(R.string.webhook_url_key), "")!!
         httpMultiPart.doUpload(url, filePart, stringPart)
+    }
+
+    private fun switchLocation() {
+        // Switch between living and bedroom
+        currentLocation = if (currentLocation == getString(R.string.live_url_living_key)) {
+            getString(R.string.live_url_bedroom_key)
+        } else {
+            getString(R.string.live_url_living_key)
+        }
+        
+        // Save current location to SharedPreferences
+        sharedPreferences
+            .edit()
+            .putString(getString(R.string.current_live_location_key), currentLocation)
+            .apply()
+        
+        // Update icon
+        updateLocationIcon()
+        
+        // Restart player with new URL
+        releasePlayer()
+        initializePlayer()
+    }
+    
+    private fun updateLocationIcon() {
+        val iconResource = if (currentLocation == getString(R.string.live_url_living_key)) {
+            R.drawable.ic_living
+        } else {
+            R.drawable.ic_bedroom
+        }
+        viewBinding.locationSwitch.setImageResource(iconResource)
     }
 
 }

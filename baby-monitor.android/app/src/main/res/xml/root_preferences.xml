@@ -16,8 +16,12 @@
         app:icon="@drawable/ic_menu_live">
 
         <EditTextPreference
-            app:key="@string/live_url_key"
-            app:title="@string/live_url_name"
+            app:key="@string/live_url_living_key"
+            app:title="@string/live_url_living_name"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="@string/live_url_bedroom_key"
+            app:title="@string/live_url_bedroom_name"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
             app:key="@string/webhook_url_key"

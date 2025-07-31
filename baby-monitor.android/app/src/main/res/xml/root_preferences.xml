@@ -35,15 +35,5 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        app:title="@string/menu_gallery"
-        app:icon="@drawable/ic_menu_gallery">
-
-        <EditTextPreference
-            app:key="@string/album_id_key"
-            app:title="@string/album_id_name"
-            app:useSimpleSummaryProvider="true" />
-
-    </PreferenceCategory>
 
 </PreferenceScreen>

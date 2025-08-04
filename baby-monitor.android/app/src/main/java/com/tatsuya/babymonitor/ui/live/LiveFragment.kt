@@ -30,12 +30,14 @@ import com.tatsuya.babymonitor.databinding.FragmentLiveBinding
 import com.tatsuya.babymonitor.ui.zoom.ZoomGestureListener
 import com.tatsuya.babymonitor.ui.zoom.ZoomScaleGestureListener
 import java.io.File
-
+import androidx.core.graphics.createBitmap
+import androidx.media3.common.PlaybackException
 
 class LiveFragment : Fragment() {
 
     companion object {
         fun newInstance() = LiveFragment()
+        private const val TAG = "LiveFragment"
     }
 
     private lateinit var viewModel: LiveViewModel
@@ -57,6 +59,31 @@ class LiveFragment : Fragment() {
     private lateinit var httpMultiPart: HttpPostMultiPart
     private lateinit var gestureDetector: GestureDetectorCompat
     private lateinit var scaleGestureDetector: ScaleGestureDetector
+
+    private val playerListener = object : Player.Listener {
+        override fun onPlayerError(error: PlaybackException) {
+            super.onPlayerError(error)
+            // ExoPlayerで再生エラーが発生した場合
+            Log.e(TAG, "Player error: ${error.message}", error)
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.player_error_message, currentLocation), // エラーメッセージにカメラ名を含める
+                Toast.LENGTH_LONG
+            ).show()
+            // 必要に応じて、エラー発生時の追加処理（例：リトライロジック、UIの更新など）をここに記述
+        }
+
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            super.onPlaybackStateChanged(playbackState)
+            // 接続試行中やバッファリングの状態などをUIに表示することも可能
+            when (playbackState) {
+                Player.STATE_BUFFERING -> Log.d(TAG, "Player state: Buffering")
+                Player.STATE_ENDED -> Log.d(TAG, "Player state: Ended")
+                Player.STATE_IDLE -> Log.d(TAG, "Player state: Idle")
+                Player.STATE_READY -> Log.d(TAG, "Player state: Ready")
+            }
+        }
+    }
 
     @OptIn(UnstableApi::class)
     override fun onCreateView(
@@ -110,31 +137,43 @@ class LiveFragment : Fragment() {
         releasePlayer()
     }
 
-    @OptIn(UnstableApi::class)
     private fun initializePlayer() {
         // Load current location from SharedPreferences
         currentLocation = sharedPreferences.getString(getString(R.string.current_live_location_key), getString(R.string.live_url_living_key))!!
         val url = sharedPreferences.getString(currentLocation, "")!!
         updateLocationIcon()
-        val mediaItem = MediaItem.fromUri(url)
-        // ExoPlayer implements the Player interface
-        player = ExoPlayer.Builder(requireContext())
-            .build()
-            .also { exoPlayer ->
-                viewBinding.videoView.player = exoPlayer
-                // Update the track selection parameters to only pick standard definition tracks
-                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
-                    .buildUpon()
-                    .setMaxVideoSizeSd()
-                    .build()
 
-                exoPlayer.setMediaItem(mediaItem)
-                exoPlayer.playWhenReady = true
-                exoPlayer.prepare()
-            }
+        try {
+            val mediaItem = MediaItem.fromUri(url)
+            // ExoPlayer implements the Player interface
+            player = ExoPlayer.Builder(requireContext())
+                .build()
+                .also { exoPlayer ->
+                    viewBinding.videoView.player = exoPlayer
+                    exoPlayer.addListener(playerListener)
+                    // Update the track selection parameters to only pick standard definition tracks
+                    exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
+                        .buildUpon()
+                        .setMaxVideoSizeSd()
+                        .build()
 
-        val isMute = sharedPreferences.getBoolean(getString(R.string.isMute_key), false)
-        toggleVolume(isMute)
+                    exoPlayer.setMediaItem(mediaItem)
+                    exoPlayer.playWhenReady = true
+                    exoPlayer.prepare()
+                }
+
+            val isMute = sharedPreferences.getBoolean(getString(R.string.isMute_key), false)
+            toggleVolume(isMute)
+        } catch (e: Exception) {
+            // MediaItem.fromUri など、ExoPlayerの準備前の同期的な処理で例外が発生した場合
+            Log.e(TAG, "Error initializing player for $currentLocation: ${e.message}", e)
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.player_init_error_message, currentLocation),
+                Toast.LENGTH_LONG
+            ).show()
+            releasePlayer() // 失敗したらプレーヤーを解放
+        }
     }
 
     private fun releasePlayer() {
@@ -147,7 +186,7 @@ class LiveFragment : Fragment() {
         player = null
     }
 
-    @OptIn(UnstableApi::class) private fun toggleVolume(isMute: Boolean) {
+    private fun toggleVolume(isMute: Boolean) {
         player.also { exoPlayer ->
             exoPlayer?.volume = if (isMute) 0f else 1f
             sharedPreferences
@@ -160,11 +199,7 @@ class LiveFragment : Fragment() {
     }
 
     private fun capture(context: Context, view: SurfaceView) {
-        val bitmap = Bitmap.createBitmap(
-            view.width,
-            view.height,
-            Bitmap.Config.ARGB_8888
-        )
+        val bitmap = createBitmap(view.width, view.height)
         PixelCopy.request(
             view,
             bitmap,
@@ -209,21 +244,21 @@ class LiveFragment : Fragment() {
         } else {
             getString(R.string.live_url_living_key)
         }
-        
+
         // Save current location to SharedPreferences
         sharedPreferences
             .edit()
             .putString(getString(R.string.current_live_location_key), currentLocation)
             .apply()
-        
+
         // Update icon
         updateLocationIcon()
-        
+
         // Restart player with new URL
         releasePlayer()
         initializePlayer()
     }
-    
+
     private fun updateLocationIcon() {
         val iconResource = if (currentLocation == getString(R.string.live_url_living_key)) {
             R.drawable.ic_living

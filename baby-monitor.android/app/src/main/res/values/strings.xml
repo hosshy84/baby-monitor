@@ -35,4 +35,8 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails</string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="label_capture">label_capture</string>
+
+    <!-- 他の文字列 -->
+    <string name="player_error_message">%1$s の再生に失敗しました。接続を確認してください。</string>
+    <string name="player_init_error_message">%1$s のプレーヤー初期化に失敗しました。</string>
 </resources>

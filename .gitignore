@@ -8,5 +8,5 @@ baby-monitor.android/.gradle
 baby-monitor.android/.idea/
 baby-monitor.android/build/
 baby-monitor.android/captures/
-baby-monitor.android/keystore.properties
 baby-monitor.android/local.properties
+baby-monitor.android/app/google-services.json

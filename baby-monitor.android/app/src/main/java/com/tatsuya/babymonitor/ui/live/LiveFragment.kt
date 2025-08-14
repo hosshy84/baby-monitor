@@ -32,6 +32,10 @@ import com.tatsuya.babymonitor.ui.zoom.ZoomScaleGestureListener
 import java.io.File
 import androidx.core.graphics.createBitmap
 import androidx.media3.common.PlaybackException
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import java.util.Date
+import java.util.concurrent.TimeUnit
 
 class LiveFragment : Fragment() {
 
@@ -59,6 +63,9 @@ class LiveFragment : Fragment() {
     private lateinit var httpMultiPart: HttpPostMultiPart
     private lateinit var gestureDetector: GestureDetectorCompat
     private lateinit var scaleGestureDetector: ScaleGestureDetector
+    private lateinit var firestore: FirebaseFirestore
+    private var thermoHandler: Handler? = null
+    private var thermoRunnable: Runnable? = null
 
     private val playerListener = object : Player.Listener {
         override fun onPlayerError(error: PlaybackException) {
@@ -103,6 +110,7 @@ class LiveFragment : Fragment() {
         val zoomView = viewBinding.videoView
         gestureDetector = GestureDetectorCompat(requireContext(), ZoomGestureListener(zoomView))
         scaleGestureDetector = ScaleGestureDetector(requireContext(), ZoomScaleGestureListener(zoomView))
+        firestore = FirebaseFirestore.getInstance()
         return viewBinding.root
     }
 
@@ -164,6 +172,9 @@ class LiveFragment : Fragment() {
 
             val isMute = sharedPreferences.getBoolean(getString(R.string.isMute_key), false)
             toggleVolume(isMute)
+            
+            // Start thermohygrometer data fetching
+            startThermohygrometerUpdates()
         } catch (e: Exception) {
             // MediaItem.fromUri など、ExoPlayerの準備前の同期的な処理で例外が発生した場合
             Log.e(TAG, "Error initializing player for $currentLocation: ${e.message}", e)
@@ -184,6 +195,9 @@ class LiveFragment : Fragment() {
             player.release()
         }
         player = null
+        
+        // Stop thermohygrometer updates
+        stopThermohygrometerUpdates()
     }
 
     private fun toggleVolume(isMute: Boolean) {
@@ -266,6 +280,75 @@ class LiveFragment : Fragment() {
             R.drawable.ic_bedroom
         }
         viewBinding.locationSwitch.setImageResource(iconResource)
+    }
+    
+    private fun startThermohygrometerUpdates() {
+        thermoHandler = Handler(Looper.getMainLooper())
+        thermoRunnable = object : Runnable {
+            override fun run() {
+                fetchLatestThermohygrometerData()
+                thermoHandler?.postDelayed(this, 60000) // 1 minute
+            }
+        }
+        thermoRunnable?.let { thermoHandler?.post(it) }
+    }
+    
+    private fun stopThermohygrometerUpdates() {
+        thermoRunnable?.let { thermoHandler?.removeCallbacks(it) }
+        thermoHandler = null
+        thermoRunnable = null
+    }
+    
+    private fun fetchLatestThermohygrometerData() {
+        val fiveMinutesAgo = Date(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5))
+        val deviceName = if (currentLocation == getString(R.string.live_url_living_key)) {
+            "raspberrypi5"
+        } else {
+            "raspberrypi3"
+        }
+        
+        try {
+            firestore.collection("thermohygrometer")
+                .whereEqualTo("device_name", deviceName)
+                .whereGreaterThan("timestamp", fiveMinutesAgo)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (!documents.isEmpty) {
+                        val document = documents.first()
+                        val temperature = document.getDouble("temperature")
+                        val humidity = document.getDouble("humidity")
+                        Log.d(TAG, "Fetched thermohygrometer data: temperature=$temperature, humidity=$humidity")
+                        
+                        if (temperature != null && humidity != null) {
+                            updateThermohygrometerUI(temperature, humidity)
+                        }
+                    } else {
+                        Log.w(TAG, "No recent thermohygrometer data found")
+                        // No recent data found
+                        updateThermohygrometerUI(null, null)
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.w(TAG, "Error fetching thermohygrometer data: ${exception.message}")
+                    // Continue showing placeholder data instead of crashing
+                    updateThermohygrometerUI(null, null)
+                }
+        } catch (e: Exception) {
+            Log.w(TAG, "Exception during Firestore query: ${e.message}")
+            updateThermohygrometerUI(null, null)
+        }
+    }
+    
+    private fun updateThermohygrometerUI(temperature: Double?, humidity: Double?) {
+        if (temperature != null && humidity != null) {
+            viewBinding.temperatureText.text = "温度: %.1f°C".format(temperature)
+            viewBinding.humidityText.text = "湿度: %.1f%%".format(humidity)
+        } else {
+            viewBinding.temperatureText.text = "温度: --.-°C"
+            viewBinding.humidityText.text = "湿度: --.-%"
+        }
     }
 
 }

@@ -9,18 +9,15 @@
     <string name="action_settings">設定</string>
 
     <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
     <string name="menu_profile">Profile</string>
     <string name="menu_live">Live</string>
-    <string name="menu_live2">Live 2 (MediaPlayer)</string>
-    <string name="menu_live3">Live 3 (ExoPlayer)</string>
 
     <!-- Messages Preferences -->
     <string name="url">URL</string>
     <string name="live_url_living_key">live_url_living</string>
-    <string name="live_url_living_name">Living URL</string>
+    <string name="live_url_living_name">リビング</string>
     <string name="live_url_bedroom_key">live_url_bedroom</string>
-    <string name="live_url_bedroom_name">Bedroom URL</string>
+    <string name="live_url_bedroom_name">寝室</string>
     <string name="current_live_location_key">current_live_location</string>
     <string name="webhook_url_key">webhook_url</string>
     <string name="webhook_url_name">Webhook URL</string>

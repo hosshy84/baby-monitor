@@ -36,11 +36,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        }
     }
     buildFeatures {
         viewBinding = true
@@ -72,15 +74,9 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer:1.7.1")
     implementation("androidx.media3:media3-exoplayer-rtsp:1.7.1")
     implementation("androidx.media3:media3-ui:1.7.1")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.android.volley:volley:1.2.1")
     implementation("org.apache.httpcomponents:httpcore:4.4.16")
     implementation("org.apache.httpcomponents:httpmime:4.5.12")
-    implementation("io.grpc:grpc-okhttp:1.59.1")
-    implementation("io.grpc:grpc-netty:1.59.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
-    implementation("com.github.bumptech.glide:glide:4.12.0")
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")

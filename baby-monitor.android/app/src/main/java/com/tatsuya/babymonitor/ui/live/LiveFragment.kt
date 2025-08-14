@@ -234,10 +234,15 @@ class LiveFragment : Fragment() {
     }
 
     private fun postDate(file: File) {
+        val room = if (currentLocation == getString(R.string.live_url_living_key)) {
+            getString(R.string.live_url_living_name)
+        } else {
+            getString(R.string.live_url_bedroom_name)
+        }
         val filePart = mapOf("file1" to file)
         val stringPart = mapOf("payload_json" to """
 {
-    "content": "現在の${getText(R.string.baby_name)}の様子",
+    "content": "現在の${room}の様子",
     "embeds": [
     {
         "title": "",

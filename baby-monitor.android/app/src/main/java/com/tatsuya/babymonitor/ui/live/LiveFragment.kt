@@ -42,6 +42,7 @@ class LiveFragment : Fragment() {
     companion object {
         fun newInstance() = LiveFragment()
         private const val TAG = "LiveFragment"
+        private const val BUFFERING_TIMEOUT_MS = 10000L // 10秒
     }
 
     private lateinit var viewModel: LiveViewModel
@@ -66,28 +67,66 @@ class LiveFragment : Fragment() {
     private lateinit var firestore: FirebaseFirestore
     private var thermoHandler: Handler? = null
     private var thermoRunnable: Runnable? = null
+    private var hasRetriedPlayerInitialization = false // リトライ済みフラグ
+
+    // バッファリングタイムアウト関連
+    private var bufferingTimeoutHandler: Handler? = null
+    private var bufferingTimeoutRunnable: Runnable? = null
+    private var isInBufferingState = false
 
     private val playerListener = object : Player.Listener {
         override fun onPlayerError(error: PlaybackException) {
             super.onPlayerError(error)
             // ExoPlayerで再生エラーが発生した場合
             Log.e(TAG, "Player error: ${error.message}", error)
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.player_error_message, currentLocation), // エラーメッセージにカメラ名を含める
-                Toast.LENGTH_LONG
-            ).show()
-            // 必要に応じて、エラー発生時の追加処理（例：リトライロジック、UIの更新など）をここに記述
+
+            // バッファリングタイムアウトをキャンセル
+            cancelBufferingTimeout()
+
+            if (!hasRetriedPlayerInitialization) {
+                // まだリトライしていない場合
+                releasePlayer()
+                initializePlayer()
+                hasRetriedPlayerInitialization = true // リトライ済みフラグを立てる
+            } else {
+                // 既にリトライ済みの場合
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.player_error_message, currentLocation), // 通常のエラーメッセージ
+                    Toast.LENGTH_LONG
+                ).show()
+                // ここでさらにユーザーに通知するなどの処理を追加できます
+            }
         }
 
         override fun onPlaybackStateChanged(playbackState: Int) {
             super.onPlaybackStateChanged(playbackState)
+            // 共通ログ出力処理
+            Log.d(TAG, "onPlaybackStateChanged: state=$playbackState")
+            
             // 接続試行中やバッファリングの状態などをUIに表示することも可能
             when (playbackState) {
-                Player.STATE_BUFFERING -> Log.d(TAG, "Player state: Buffering")
-                Player.STATE_ENDED -> Log.d(TAG, "Player state: Ended")
-                Player.STATE_IDLE -> Log.d(TAG, "Player state: Idle")
-                Player.STATE_READY -> Log.d(TAG, "Player state: Ready")
+                Player.STATE_BUFFERING -> {
+                    Log.d(TAG, "Player state: Buffering")
+                    startBufferingTimeout()
+                }
+                Player.STATE_ENDED -> {
+                    Log.d(TAG, "Player state: Ended")
+                    cancelBufferingTimeout()
+                }
+                Player.STATE_IDLE -> {
+                    Log.d(TAG, "Player state: Idle")
+                    cancelBufferingTimeout()
+                }
+                Player.STATE_READY -> {
+                    Log.d(TAG, "Player state: Ready")
+                    // プレイヤーが正常に再生準備完了状態になったら、リトライフラグをリセットする
+                    // これにより、次にエラーが発生した際に再度リトライが試みられます。
+                    // もし、一度限りのリトライ（アプリ起動中1回のみ）としたい場合は、このリセット処理は不要です。
+                    // 状況に応じてどちらの挙動が良いか選択してください。
+                    hasRetriedPlayerInitialization = false
+                    cancelBufferingTimeout()
+                }
             }
         }
     }
@@ -198,6 +237,43 @@ class LiveFragment : Fragment() {
         
         // Stop thermohygrometer updates
         stopThermohygrometerUpdates()
+        
+        // Cancel buffering timeout
+        cancelBufferingTimeout()
+    }
+
+    private fun startBufferingTimeout() {
+        // 既存のタイムアウトをキャンセル
+        cancelBufferingTimeout()
+        
+        isInBufferingState = true
+        bufferingTimeoutHandler = Handler(Looper.getMainLooper())
+        bufferingTimeoutRunnable = Runnable {
+            if (isInBufferingState) {
+                Log.w(TAG, "Buffering timeout occurred. Retrying player initialization.")
+                Toast.makeText(
+                    requireContext(),
+                    "バッファリングがタイムアウトしました。再試行中...",
+                    Toast.LENGTH_SHORT
+                ).show()
+                
+                // プレイヤーを再初期化
+                releasePlayer()
+                initializePlayer()
+            }
+        }
+        bufferingTimeoutHandler?.postDelayed(bufferingTimeoutRunnable!!, BUFFERING_TIMEOUT_MS)
+        Log.d(TAG, "Started buffering timeout timer")
+    }
+    
+    private fun cancelBufferingTimeout() {
+        isInBufferingState = false
+        bufferingTimeoutRunnable?.let { 
+            bufferingTimeoutHandler?.removeCallbacks(it)
+            Log.d(TAG, "Cancelled buffering timeout timer")
+        }
+        bufferingTimeoutHandler = null
+        bufferingTimeoutRunnable = null
     }
 
     private fun toggleVolume(isMute: Boolean) {

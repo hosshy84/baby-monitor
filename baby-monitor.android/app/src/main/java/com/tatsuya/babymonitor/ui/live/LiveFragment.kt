@@ -99,35 +99,24 @@ class LiveFragment : Fragment() {
             }
         }
 
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            super.onIsPlayingChanged(isPlaying)
+            Log.d(TAG, "onIsPlayingChanged: isPlaying=$isPlaying")
+
+            if (isPlaying) {
+                // 再生中の場合、リトライフラグをリセットしタイムアウトをキャンセル
+                hasRetriedPlayerInitialization = false
+                cancelBufferingTimeout()
+            } else {
+                // 再生が停止した場合、タイムアウトを開始
+                startBufferingTimeout()
+            }
+        }
+
         override fun onPlaybackStateChanged(playbackState: Int) {
             super.onPlaybackStateChanged(playbackState)
             // 共通ログ出力処理
             Log.d(TAG, "onPlaybackStateChanged: state=$playbackState")
-            
-            // 接続試行中やバッファリングの状態などをUIに表示することも可能
-            when (playbackState) {
-                Player.STATE_BUFFERING -> {
-                    Log.d(TAG, "Player state: Buffering")
-                    startBufferingTimeout()
-                }
-                Player.STATE_ENDED -> {
-                    Log.d(TAG, "Player state: Ended")
-                    cancelBufferingTimeout()
-                }
-                Player.STATE_IDLE -> {
-                    Log.d(TAG, "Player state: Idle")
-                    cancelBufferingTimeout()
-                }
-                Player.STATE_READY -> {
-                    Log.d(TAG, "Player state: Ready")
-                    // プレイヤーが正常に再生準備完了状態になったら、リトライフラグをリセットする
-                    // これにより、次にエラーが発生した際に再度リトライが試みられます。
-                    // もし、一度限りのリトライ（アプリ起動中1回のみ）としたい場合は、このリセット処理は不要です。
-                    // 状況に応じてどちらの挙動が良いか選択してください。
-                    hasRetriedPlayerInitialization = false
-                    cancelBufferingTimeout()
-                }
-            }
         }
     }
 

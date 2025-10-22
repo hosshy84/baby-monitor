@@ -17,10 +17,19 @@ android {
         applicationId = "com.tatsuya.babymonitor"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.0-beta2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("baby-monitor-release.jks")
+            storePassword = "android"
+            keyAlias = "baby-monitor"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
@@ -30,6 +39,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
 
         debug {

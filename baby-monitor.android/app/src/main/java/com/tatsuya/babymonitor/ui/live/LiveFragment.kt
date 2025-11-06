@@ -284,7 +284,7 @@ class LiveFragment : Fragment() {
             bitmap,
             { result ->
                 if (result == PixelCopy.SUCCESS) {
-                    val file = File(context.filesDir, "temp.png")
+                    val file = File(context.cacheDir, "temp.png")
                     val outputStream = file.outputStream()
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
                     outputStream.close()

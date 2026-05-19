@@ -1,0 +1,16 @@
+[Unit]
+Description=MediaMTX RTSP Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/mediamtx/mediamtx
+Restart=on-failure
+User=tatsuya
+WorkingDirectory=/opt/mediamtx
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+Environment=PULSE_SERVER=unix:/run/user/1000/pulse/native
+SupplementaryGroups=audio
+
+[Install]
+WantedBy=multi-user.target
